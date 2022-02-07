@@ -1,7 +1,19 @@
+import { useForm } from 'react-hook-form';
 import history from 'util/history';
 import './styles.css';
 
+type EmployeeDTO = {
+  name: string;
+  email: string;
+  department: string;
+}
+
 const Form = () => {
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<EmployeeDTO>();
+  const onSubmit = (employeeDTO: EmployeeDTO) => {
+  };
+
   const handleCancel = () => {
     history.push('/admin/employees');
   };
@@ -11,7 +23,7 @@ const Form = () => {
       <div className="base-card employee-crud-form-card">
         <h1 className="employee-crud-form-title">INFORME OS DADOS</h1>
 
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="row employee-crud-inputs-container">
             <div className="col employee-crud-inputs-left-container">
               <div className="margin-bottom-30">
@@ -24,12 +36,23 @@ const Form = () => {
               </div>
 
               <div className="margin-bottom-30">
-                <input type="text" 
-                  className="form-control base-input"
-                />
-                <div className="invalid-feedback d-block">
-                  Campo obrigatório
-                </div>
+              <input
+                  {...register('email', {
+                    required: 'Campo obrigatório',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Email inválido',
+                    },
+                  })}
+                  type="text"
+                  className={`form-control base-input ${errors.email ? 'is-invalid' : ''}`}
+                  placeholder="Email"
+                  name="email"
+                  data-testid="email"
+                  />
+                  <div className="invalid-feedback d-block">
+                    {errors.email?.message}
+                  </div>
               </div>
 
               <div className="margin-bottom-30">
