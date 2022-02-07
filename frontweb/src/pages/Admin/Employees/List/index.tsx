@@ -3,21 +3,46 @@ import './styles.css';
 import Pagination from 'components/Pagination';
 import EmployeeCard from 'components/EmployeeCard';
 import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { SpringPage } from 'types/vendor/spring';
+import { Employee } from 'types/employee';
+import { AxiosRequestConfig } from 'axios';
+import { requestBackend } from 'util/requests';
 
-const employeeHardCode = { // delete
-  id: 1,
-  name: "Carlos",
-  email: "carlos@gmail.com",
-  department: {
-    id: 1,
-    name: "Sales"
-  }
+type SubcomponentState = {
+  activePage: number;
 };
 
 const List = () => {
+  const [page, setPage] = useState<SpringPage<Employee>>();
+
+  const [subcomponentState, setSubcomponentState] = useState<SubcomponentState>(
+    {
+      activePage: 0,
+    }
+  );
+
+  const getProducts = useCallback(() => {
+    const config: AxiosRequestConfig = {
+      method: 'GET',
+      url: '/employees',
+      withCredentials: true,
+      params: {
+        page: subcomponentState.activePage,
+        size: 4,
+      },
+    };
+    requestBackend(config).then((response) => {
+      setPage(response.data);
+    });
+  }, [subcomponentState]);
+
+  useEffect(getProducts, [getProducts]);
 
   const handlePageChange = (pageNumber: number) => {
-    // to do
+    setSubcomponentState({
+      activePage: pageNumber,
+    });
   };
 
   return (
@@ -28,14 +53,18 @@ const List = () => {
         </button>
       </Link>
 
-      <EmployeeCard employee={employeeHardCode} />
-      <EmployeeCard employee={employeeHardCode} />
-      <EmployeeCard employee={employeeHardCode} />
-      <EmployeeCard employee={employeeHardCode} />
+      <div className="row">
+        {page &&
+          page.content.map((employee) => (
+            <div className="col-sm-6 col-md-12" key={employee.id}>
+              <EmployeeCard employee={employee} />
+            </div>
+          ))}
+      </div>
 
       <Pagination
-        forcePage={0}
-        pageCount={1}
+        forcePage={page?.number}
+        pageCount={page ? page.totalPages : 0}
         range={3}
         onChange={handlePageChange}
       />
