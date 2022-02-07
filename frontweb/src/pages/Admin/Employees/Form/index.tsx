@@ -1,18 +1,28 @@
-import { useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { Department } from 'types/department';
+import { Employee } from 'types/employee';
 import history from 'util/history';
+import { requestBackend } from 'util/requests';
 import './styles.css';
 
-type EmployeeDTO = {
-  name: string;
-  email: string;
-  department: string;
-}
-
 const Form = () => {
-  
-  const { register, handleSubmit, formState: { errors } } = useForm<EmployeeDTO>();
-  const onSubmit = (employeeDTO: EmployeeDTO) => {
-  };
+  const [selectDepartment, setSelectDepartment] = useState<Department[]>();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<Employee>();
+  const onSubmit = (employee: Employee) => {};
+
+  useEffect(() => {
+    requestBackend({ url: '/departments', withCredentials: true }).then(
+      (response) => setSelectDepartment(response.data)
+    );
+  }, []);
 
   const handleCancel = () => {
     history.push('/admin/employees');
@@ -27,16 +37,25 @@ const Form = () => {
           <div className="row employee-crud-inputs-container">
             <div className="col employee-crud-inputs-left-container">
               <div className="margin-bottom-30">
-                <input type="text" 
-                  className="form-control base-input is-invalid"
+                <input
+                  {...register('name', {
+                    required: 'Campo obrigatório',
+                  })}
+                  type="text"
+                  className={`form-control base-input ${
+                    errors.name ? 'is-invalid' : ''
+                  }`}
+                  placeholder="Name"
+                  name="name"
+                  data-testid="name"
                 />
                 <div className="invalid-feedback d-block">
-                  Campo obrigatório
+                  {errors.name?.message}
                 </div>
               </div>
 
               <div className="margin-bottom-30">
-              <input
+                <input
                   {...register('email', {
                     required: 'Campo obrigatório',
                     pattern: {
@@ -45,23 +64,47 @@ const Form = () => {
                     },
                   })}
                   type="text"
-                  className={`form-control base-input ${errors.email ? 'is-invalid' : ''}`}
+                  className={`form-control base-input ${
+                    errors.email ? 'is-invalid' : ''
+                  }`}
                   placeholder="Email"
                   name="email"
                   data-testid="email"
-                  />
-                  <div className="invalid-feedback d-block">
-                    {errors.email?.message}
-                  </div>
+                />
+                <div className="invalid-feedback d-block">
+                  {errors.email?.message}
+                </div>
               </div>
 
               <div className="margin-bottom-30">
-                <input type="text" 
-                  className="form-control base-input"
+                <label htmlFor="department" className="d-none">
+                  Departamento
+                </label>
+                <Controller
+                  name="department"
+                  rules={{ required: true }}
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      className={`${errors.department ? 'is-invalid' : ''}`}
+                      classNamePrefix="employee-crud-select"
+                      options={selectDepartment}
+                      getOptionLabel={(department: Department) =>
+                        department.name
+                      }
+                      getOptionValue={(department: Department) =>
+                        String(department.id)
+                      }
+                      inputId="department"
+                    />
+                  )}
                 />
-                <div className="invalid-feedback d-block">
-                  Campo obrigatório
-                </div>
+                {errors.department && (
+                  <div className="invalid-feedback d-block">
+                    Campo obrigatório
+                  </div>
+                )}
               </div>
             </div>
           </div>
