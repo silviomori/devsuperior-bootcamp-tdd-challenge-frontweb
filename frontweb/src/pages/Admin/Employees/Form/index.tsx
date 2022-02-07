@@ -1,6 +1,8 @@
+import { AxiosRequestConfig } from 'axios';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import { toast } from 'react-toastify';
 import { Department } from 'types/department';
 import { Employee } from 'types/employee';
 import history from 'util/history';
@@ -16,7 +18,24 @@ const Form = () => {
     formState: { errors },
     control,
   } = useForm<Employee>();
-  const onSubmit = (employee: Employee) => {};
+
+  const onSubmit = (employee: Employee) => {
+    const config: AxiosRequestConfig = {
+      method: 'POST',
+      url: '/employees',
+      data: employee,
+      withCredentials: true,
+    };
+    requestBackend(config)
+      .then(() => {
+        toast.info('Cadastrado com sucesso');
+        history.push('/admin/employees');
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+        toast.error('An error occurred while saving employee data.');
+      });
+  };
 
   useEffect(() => {
     requestBackend({ url: '/departments', withCredentials: true }).then(
