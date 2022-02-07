@@ -2,7 +2,6 @@ import history from 'util/history';
 import './styles.css';
 
 const Form = () => {
-
   const handleCancel = () => {
     history.push('/admin/employees');
   };
@@ -15,13 +14,12 @@ const Form = () => {
         <form>
           <div className="row employee-crud-inputs-container">
             <div className="col employee-crud-inputs-left-container">
-
               <div className="margin-bottom-30">
                 <input type="text" 
                   className="form-control base-input is-invalid"
                 />
                 <div className="invalid-feedback d-block">
-                  Mensagem de erro
+                  Campo obrigatório
                 </div>
               </div>
 
@@ -30,10 +28,18 @@ const Form = () => {
                   className="form-control base-input"
                 />
                 <div className="invalid-feedback d-block">
-                  
+                  Campo obrigatório
                 </div>
               </div>
 
+              <div className="margin-bottom-30">
+                <input type="text" 
+                  className="form-control base-input"
+                />
+                <div className="invalid-feedback d-block">
+                  Campo obrigatório
+                </div>
+              </div>
             </div>
           </div>
           <div className="employee-crud-buttons-container">
